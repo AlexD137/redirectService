@@ -1,0 +1,63 @@
+services:
+  zookeeper:
+    image: zookeeper:latest
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+
+  kafka-broker1:
+    image: wurstmeister/kafka:latest
+    ports:
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka-broker1:9092,OUTSIDE://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:29092
+      KAFKA_LOG_DIRS: /kafka/logs
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+
+  kafka-broker2:
+    image: wurstmeister/kafka:latest
+    ports:
+      - "29093:29092"
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka-broker2:9092,OUTSIDE://localhost:29093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:29092
+      KAFKA_LOG_DIRS: /kafka/logs
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+
+  kafka-broker3:
+    image: wurstmeister/kafka:latest
+    ports:
+      - "29094:29092"
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka-broker3:9092,OUTSIDE://localhost:29094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:29092
+      KAFKA_LOG_DIRS: /kafka/logs
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - "9099:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS: kafka-broker1:9092,kafka-broker2:9092,kafka-broker3:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    depends_on:
+      - kafka-broker1
+      - kafka-broker2
+      - kafka-broker3
+

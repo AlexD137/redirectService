@@ -9,6 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+
 
 @RestController
 @RequestMapping("/api/v1")
@@ -23,14 +26,18 @@ public class RedirectController {
                                           @RequestParam("campaignId") String campaignId,
                                           @RequestHeader("User-Agent") String userAgent) {
 
-
-        RedirectDto redirectDto = new RedirectDto(url, hash, campaignId, userAgent);
-
-        if (!redirectService.isHashValid(redirectDto.getUrl(), redirectDto.getHash())) {
+        if (!redirectService.isHashValid(url, hash)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        redirectService.sendAnalyze(redirectDto);
+        redirectService.sendAnalyze(
+                RedirectDto.builder()
+                        .url(url)
+                        .campaignId(campaignId)
+                        .userAgent(userAgent)
+                        .redirectTime(Timestamp.valueOf(LocalDateTime.now()))
+                        .build()
+        );
 
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(URI.create(url))
